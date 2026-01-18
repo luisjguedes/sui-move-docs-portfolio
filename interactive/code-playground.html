@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Move Code Playground - Interactive Examples</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .playground {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .example-selector {
+            background: #f8fafc;
+            padding: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .example-selector h3 {
+            color: #334155;
+            margin-bottom: 15px;
+        }
+
+        .example-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .example-btn {
+            padding: 10px 20px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            color: #475569;
+            transition: all 0.3s;
+        }
+
+        .example-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            transform: translateY(-1px);
+        }
+
+        .example-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .content-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 600px;
+        }
+
+        .code-panel {
+            background: #1e293b;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .explanation-panel {
+            background: white;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .code-panel .panel-title {
+            color: #f1f5f9;
+            border-color: #334155;
+        }
+
+        pre {
+            background: transparent;
+            color: #e2e8f0;
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        .keyword { color: #f472b6; font-weight: bold; }
+        .type { color: #34d399; }
+        .function { color: #60a5fa; }
+        .comment { color: #94a3b8; font-style: italic; }
+        .string { color: #fbbf24; }
+        .number { color: #c084fc; }
+
+        .explanation h4 {
+            color: #1e40af;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .explanation p {
+            color: #475569;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .explanation ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .explanation li {
+            color: #475569;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .info-card {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .info-card strong {
+            color: #1e40af;
+        }
+
+        .warning-card {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .warning-card strong {
+            color: #92400e;
+        }
+
+        .success-card {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .success-card strong {
+            color: #065f46;
+        }
+
+        .code-highlight {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #1e40af;
+        }
+
+        @media (max-width: 968px) {
+            .content-area {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ Move Code Playground</h1>
+            <p>Interactive examples to learn Sui Move programming</p>
+        </div>
+
+        <div class="playground">
+            <div class="example-selector">
+                <h3>Choose an Example:</h3>
+                <div class="example-buttons">
+                    <button class="example-btn active" onclick="loadExample('nft')">Create NFT</button>
+                    <button class="example-btn" onclick="loadExample('token')">Mint Token</button>
+                    <button class="example-btn" onclick="loadExample('capability')">Capability Pattern</button>
+                    <button class="example-btn" onclick="loadExample('marketplace')">Marketplace</button>
+                    <button class="example-btn" onclick="loadExample('dynamic')">Dynamic Fields</button>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <div class="code-panel">
+                    <div class="panel-title">📝 Move Code</div>
+                    <pre id="code-display"></pre>
+                </div>
+                <div class="explanation-panel">
+                    <div class="panel-title">💡 Explanation</div>
+                    <div id="explanation-display"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const examples = {
+            nft: {
+                code: `<span class="keyword">module</span> my_package::nft {
+    <span class="keyword">use</span> sui::object::{Self, UID};
+    <span class="keyword">use</span> sui::transfer;
+    <span class="keyword">use</span> sui::tx_context::{Self, TxContext};
+    <span class="keyword">use</span> std::string::String;
+
+    <span class="comment">/// A simple NFT that can be owned</span>
+    <span class="keyword">public struct</span> <span class="type">NFT</span> <span class="keyword">has key</span> {
+        id: <span class="type">UID</span>,
+        name: <span class="type">String</span>,
+        description: <span class="type">String</span>,
+        creator: <span class="type">address</span>,
+    }
+
+    <span class="comment">/// Create and transfer an NFT to the caller</span>
+    <span class="keyword">public entry fun</span> <span class="function">mint</span>(
+        name: <span class="type">String</span>,
+        description: <span class="type">String</span>,
+        ctx: &<span class="keyword">mut</span> <span class="type">TxContext</span>
+    ) {
+        <span class="keyword">let</span> sender = tx_context::sender(ctx);
+        
+        <span class="keyword">let</span> nft = <span class="type">NFT</span> {
+            id: object::new(ctx),
+            name,
+            description,
+            creator: sender,
+        };
+        
+        transfer::transfer(nft, sender);
+    }
+
+    <span class="comment">/// Transfer NFT to a new owner</span>
+    <span class="keyword">public entry fun</span> <span class="function">transfer_nft</span>(
+        nft: <span class="type">NFT</span>,
+        recipient: <span class="type">address</span>,
+    ) {
+        transfer::transfer(nft, recipient);
+    }
+}`,
+                explanation: `
+                    <h4>What This Code Does</h4>
+                    <p>This is a basic NFT implementation on Sui. It allows users to create unique digital assets with a name, description, and creator information.</p>
+
+                    <h4>Key Concepts</h4>
+                    <ul>
+                        <li><strong>Struct with 'key' ability:</strong> The <span class="code-highlight">NFT</span> struct has the <span class="code-highlight">key</span> ability, which means it can be owned and stored on-chain.</li>
+                        <li><strong>UID:</strong> Every object needs a unique identifier. We use <span class="code-highlight">object::new(ctx)</span> to generate one.</li>
+                        <li><strong>Transfer ownership:</strong> The <span class="code-highlight">transfer::transfer()</span> function moves the NFT to the specified address.</li>
+                        <li><strong>Entry functions:</strong> Functions marked with <span class="code-highlight">entry</span> can be called directly from transactions.</li>
+                    </ul>
+
+                    <div class="info-card">
+                        <strong>💡 Tip:</strong> In Sui, objects must have the <span class="code-highlight">key</span> ability to be owned. Without it, the object can only exist as part of another object.
+                    </div>
+
+                    <h4>How to Use</h4>
+                    <p>After publishing this module, you can mint an NFT with:</p>
+                    <div class="success-card">
+                        <code>sui client call --package &lt;ID&gt; --module nft --function mint --args "My NFT" "A cool collectible"</code>
+                    </div>
+                `
+            },
+            token: {
+                code: `<span class="keyword">module</span> my_package::token {
+    <span class="keyword">use</span> sui::object::{Self, UID};
+    <span class="keyword">use</span> sui::transfer;
+    <span class="keyword">use</span> sui::tx_context::{Self, TxContext};
+    <span class="keyword">use</span> sui::balance::{Self, Balance};
+    <span class="keyword">use</span> sui::coin::{Self, Coin};
+
+    <span class="comment">/// One-time witness for token creation</span>
+    <span class="keyword">public struct</span> <span class="type">TOKEN</span> <span class="keyword">has drop</span> {}
+
+    <span class="comment">/// Treasury capability for minting</span>
+    <span class="keyword">public struct</span> <span class="type">Treasury</span> <span class="keyword">has key</span> {
+        id: <span class="type">UID</span>,
+        supply: <span class="type">u64</span>,
+    }
+
+    <span class="comment">/// Initialize the token (called once at publish)</span>
+    <span class="keyword">fun</span> <span class="function">init</span>(witness: <span class="type">TOKEN</span>, ctx: &<span class="keyword">mut</span> <span class="type">TxContext</span>) {
+        <span class="keyword">let</span> treasury = <span class="type">Treasury</span> {
+            id: object::new(ctx),
+            supply: <span class="number">0</span>,
+        };
+        
+        transfer::transfer(treasury, tx_context::sender(ctx));
+    }
+
+    <span class="comment">/// Mint new tokens</span>
+    <span class="keyword">public entry fun</span> <span class="function">mint</span>(
+        treasury: &<span class="keyword">mut</span> <span class="type">Treasury</span>,
+        amount: <span class="type">u64</span>,
+        recipient: <span class="type">address</span>,
+        ctx: &<span class="keyword">mut</span> <span class="type">TxContext</span>
+    ) {
+        treasury.supply = treasury.supply + amount;
+        
+        <span class="comment">// Create coin and transfer</span>
+        <span class="keyword">let</span> coin = coin::mint(amount, ctx);
+        transfer::public_transfer(coin, recipient);
+    }
+}`,
+                explanation: `
+                    <h4>What This Code Does</h4>
+                    <p>This implements a custom fungible token on Sui. It includes a treasury system for controlled minting.</p>
+
+                    <h4>Key Concepts</h4>
+                    <ul>
+                        <li><strong>One-Time Witness:</strong> The <span class="code-highlight">TOKEN</span> struct with <span class="code-highlight">drop</span> ability is used once during initialization.</li>
+                        <li><strong>Treasury Pattern:</strong> Only the treasury holder can mint new tokens, preventing unauthorized creation.</li>
+                        <li><strong>Supply Tracking:</strong> The treasury keeps track of total tokens minted.</li>
+                        <li><strong>Init Function:</strong> Automatically called once when the module is published.</li>
+                    </ul>
+
+                    <div class="warning-card">
+                        <strong>⚠️ Important:</strong> The <span class="code-highlight">init</span> function runs exactly once when you publish the package. The treasury will be transferred to the publisher's address.
+                    </div>
+
+                    <h4>Token Economics</h4>
+                    <p>This design allows for controlled token supply. The treasury holder can mint tokens at any time, making it suitable for:</p>
+                    <ul>
+                        <li>Reward programs</li>
+                        <li>In-game currencies</li>
+                        <li>Loyalty points</li>
+                    </ul>
+
+                    <div class="info-card">
+                        <strong>💡 Best Practice:</strong> For a fixed-supply token, you could mint all tokens in the <span class="code-highlight">init</span> function and then delete the treasury.
+                    </div>
+                `
+            },
+            capability: {
+                code: `<span class="keyword">module</span> my_package::admin {
+    <span class="keyword">use</span> sui::object::{Self, UID};
+    <span class="keyword">use</span> sui::transfer;
+    <span class="keyword">use</span> sui::tx_context::{Self, TxContext};
+
+    <span class="comment">/// Admin capability - only holder can perform admin actions</span>
+    <span class="keyword">public struct</span> <span class="type">AdminCap</span> <span class="keyword">has key</span> {
+        id: <span class="type">UID</span>,
+    }
+
+    <span class="comment">/// System state that requires admin to modify</span>
+    <span class="keyword">public struct</span> <span class="type">System</span> <span class="keyword">has key</span> {
+        id: <span class="type">UID</span>,
+        paused: <span class="type">bool</span>,
+        fee: <span class="type">u64</span>,
+    }
+
+    <span class="comment">/// Initialize system and grant admin cap to deployer</span>
+    <span class="keyword">fun</span> <span class="function">init</span>(ctx: &<span class="keyword">mut</span> <span class="type">TxContext</span>) {
+        <span class="keyword">let</span> admin_cap = <span class="type">AdminCap</span> {
+            id: object::new(ctx),
+        };
+        
+        <span class="keyword">let</span> system = <span class="type">System</span> {
+            id: object::new(ctx),
+            paused: <span class="keyword">false</span>,
+            fee: <span class="number">100</span>,
+        };
+        
+        transfer::transfer(admin_cap, tx_context::sender(ctx));
+        transfer::share_object(system);
+    }
+
+    <span class="comment">/// Only admin can pause the system</span>
+    <span class="keyword">public entry fun</span> <span class="function">pause</span>(
+        _admin: &<span class="type">AdminCap</span>,  <span class="comment">// Must own AdminCap</span>
+        system: &<span class="keyword">mut</span> <span class="type">System</span>,
+    ) {
+        system.paused = <span class="keyword">true</span>;
+    }
+
+    <span class="comment">/// Anyone can check if system is paused</span>
+    <span class="keyword">public fun</span> <span class="function">is_paused</span>(system: &<span class="type">System</span>): <span class="type">bool</span> {
+        system.paused
+    }
+}`,
+                explanation: `
+                    <h4>What This Code Does</h4>
+                    <p>This implements the <strong>Capability Pattern</strong>, a common design pattern in Move for access control.</p>
+
+                    <h4>The Capability Pattern</h4>
+                    <p>Instead of checking addresses in code, we use objects as proof of authority:</p>
+                    <ul>
+                        <li>Create a special capability object (like <span class="code-highlight">AdminCap</span>)</li>
+                        <li>Give it to authorized users</li>
+                        <li>Require it as a parameter for privileged functions</li>
+                    </ul>
+
+                    <div class="success-card">
+                        <strong>✅ Why This Works:</strong> Only someone who owns the <span class="code-highlight">AdminCap</span> can call the <span class="code-highlight">pause</span> function. Move's type system enforces this at compile time!
+                    </div>
+
+                    <h4>Key Advantages</h4>
+                    <ul>
+                        <li><strong>Type-safe:</strong> No address checks needed - the type system handles it</li>
+                        <li><strong>Transferable:</strong> Admin can transfer the capability to someone else</li>
+                        <li><strong>Revocable:</strong> Delete the capability to revoke access</li>
+                        <li><strong>Multiple admins:</strong> Mint multiple capabilities for multiple admins</li>
+                    </ul>
+
+                    <h4>Real-World Uses</h4>
+                    <ul>
+                        <li>DAO voting rights</li>
+                        <li>NFT collection minting</li>
+                        <li>Protocol upgrades</li>
+                        <li>Treasury management</li>
+                    </ul>
+
+                    <div class="info-card">
+                        <strong>💡 Pattern Variation:</strong> You can create different capability types for different permission levels (AdminCap, ModeratorCap, UserCap).
+                    </div>
+                `
+            },
+            marketplace: {
+                code: `<span class="keyword">module</span> my_package::marketplace {
+    <span class="keyword">use</span> sui::object::{Self, ID, UID};
+    <span class="keyword">use</span> sui::transfer;
+    <span class="keyword">use</span> sui::tx_context::TxContext;
+    <span class="keyword">use</span> sui::coin::{Self, Coin};
+    <span class="keyword">use</span> sui::sui::SUI;
+
+    <span class="comment">/// Generic item that can be listed</span>
+    <span class="keyword">public struct</span> <span class="type">Item</span>&lt;T: <span class="keyword">key</span> + <span class="keyword">store</span>&gt; <span class="keyword">has key</span> {
+        id: <span class="type">UID</span>,
+        inner: T,
+    }
+
+    <span class="comment">/// A listing on the marketplace</span>
+    <span class="keyword">public struct</span> <span class="type">Listing</span>&lt;T: <span class="keyword">key</span> + <span class="keyword">store</span>&gt; <span class="keyword">has key</span> {
+        id: <span class="type">UID</span>,
+        seller: <span class="type">address</span>,
+        price: <span class="type">u64</span>,
+        item_id: <span class="type">ID</span>,
+    }
+
+    <span class="comment">/// List an item for sale</span>
+    <span class="keyword">public entry fun</span> <span class="function">list</span>&lt;T: <span class="keyword">key</span> + <span class="keyword">store</span>&gt;(
+        item: T,
+        price: <span class="type">u64</span>,
+        ctx: &<span class="keyword">mut</span> <span class="type">TxContext</span>
+    ) {
+        <span class="keyword">let</span> item_id = object::id(&item);
+        
+        <span class="keyword">let</span> wrapped = <span class="type">Item</span> {
+            id: object::new(ctx),
+            inner: item,
+        };
+        
+        <span class="keyword">let</span> listing = <span class="type">Listing</span>&lt;T&gt; {
+            id: object::new(ctx),
+            seller: tx_context::sender(ctx),
+            price,
+            item_id,
+        };
+        
+        transfer::share_object(wrapped);
+        transfer::share_object(listing);
+    }
+
+    <span class="comment">/// Purchase a listed item</span>
+    <span class="keyword">public entry fun</span> <span class="function">purchase</span>&lt;T: <span class="keyword">key</span> + <span class="keyword">store</span>&gt;(
+        listing: <span class="type">Listing</span>&lt;T&gt;,
+        wrapped: <span class="type">Item</span>&lt;T&gt;,
+        payment: <span class="type">Coin</span>&lt;<span class="type">SUI</span>&gt;,
+        ctx: &<span class="keyword">mut</span> <span class="type">TxContext</span>
+    ) {
+        <span class="keyword">let</span> <span class="type">Listing</span> { id, seller, price, item_id } = listing;
+        <span class="keyword">let</span> <span class="type">Item</span> { id: item_id_inner, inner } = wrapped;
+        
+        <span class="comment">// Verify payment is sufficient</span>
+        <span class="keyword">assert!</span>(coin::value(&payment) &gt;= price, <span class="number">0</span>);
+        
+        <span class="comment">// Transfer payment to seller</span>
+        transfer::public_transfer(payment, seller);
+        
+        <span class="comment">// Transfer item to buyer</span>
+        transfer::public_transfer(inner, tx_context::sender(ctx));
+        
+        <span class="comment">// Clean up</span>
+        object::delete(id);
+        object::delete(item_id_inner);
+    }
+}`,
+                explanation: `
+                    <h4>What This Code Does</h4>
+                    <p>This is a generic marketplace where users can list and purchase any type of item that has the <span class="code-highlight">key + store</span> abilities.</p>
+
+                    <h4>Key Concepts</h4>
+                    <ul>
+                        <li><strong>Generics:</strong> The <span class="code-highlight">&lt;T: key + store&gt;</span> syntax means this works with any tradeable object type.</li>
+                        <li><strong>Object Wrapping:</strong> Items are wrapped when listed, preventing the seller from using them.</li>
+                        <li><strong>Atomic Swap:</strong> Payment and item transfer happen in one transaction - no risk of scams.</li>
+                        <li><strong>Shared Objects:</strong> Listings are shared so anyone can purchase them.</li>
+                    </ul>
+
+                    <div class="info-card">
+                        <strong>💡 Why Wrapping?</strong> When an item is wrapped in <span class="code-highlight">Item&lt;T&gt;</span>, it becomes inaccessible to the seller. They can't transfer it or modify it while it's listed.
+                    </div>
+
+                    <h4>The Purchase Flow</h4>
+                    <ol>
+                        <li>Buyer calls <span class="code-highlight">purchase</span> with payment</li>
+                        <li>Contract verifies payment amount is sufficient</li>
+                        <li>Payment goes to seller</li>
+                        <li>Item is unwrapped and goes to buyer</li>
+                        <li>Listing objects are deleted</li>
+                    </ol>
+
+                    <div class="success-card">
+                        <strong>✅ Security:</strong> This design is trustless - no escrow needed. The blockchain guarantees either both transfers happen or neither does.
+                    </div>
+
+                    <h4>What Can Be Sold?</h4>
+                    <p>This marketplace can sell:</p>
+                    <ul>
+                        <li>NFTs (have <span class="code-highlight">key + store</span>)</li>
+                        <li>Game items</li>
+                        <li>Domain names</li>
+                        <li>Tickets</li>
+                        <li>Any custom object with the right abilities</li>
+                    </ul>
+                `
+            },
+            dynamic: {
+                code: `<span class="keyword">module</span> my_package::inventory {
+    <span class="keyword">use</span> sui::object::{Self, UID};
+    <span class="keyword">use</span> sui::transfer;
+    <span class="keyword">use</span> sui::tx_context::TxContext;
+    <span class="keyword">use</span> sui::dynamic_field <span class="keyword">as</span> df;
+    <span class="keyword">use</span> std::string::String;
+
+    <span class="comment">/// Player inventory with dynamic items</span>
+    <span class="keyword">public struct</span> <span class="type">Inventory</span> <span class="keyword">has key</span> {
+        id: <span class="type">UID</span>,
+        owner: <span class="type">address</span>,
+        <span class="comment">// Items stored as dynamic fields</span>
+    }
+
+    <span class="comment">/// A game item</span>
+    <span class="keyword">public struct</span> <span class="type">GameItem</span> <span class="keyword">has store</span> {
+        name: <span class="type">String</span>,
+        power: <span class="type">u64</span>,
+        rarity: <span class="type">u8</span>,
+    }
+
+    <span class="comment">/// Create a new inventory</span>
+    <span class="keyword">public entry fun</span> <span class="function">create_inventory</span>(ctx: &<span class="keyword">mut</span> <span class="type">TxContext</span>) {
+        <span class="keyword">let</span> inventory = <span class="type">Inventory</span> {
+            id: object::new(ctx),
+            owner: tx_context::sender(ctx),
+        };
+        transfer::transfer(inventory, tx_context::sender(ctx));
+    }
+
+    <span class="comment">/// Add an item to inventory</span>
+    <span class="keyword">public entry fun</span> <span class="function">add_item</span>(
+        inventory: &<span class="keyword">mut</span> <span class="type">Inventory</span>,
+        item_name: <span class="type">String</span>,
+        power: <span class="type">u64</span>,
+        rarity: <span class="type">u8</span>,
+    ) {
+        <span class="keyword">let</span> item = <span class="type">GameItem</span> {
+            name: item_name,
+            power,
+            rarity,
+        };
+        
+        <span class="comment">// Add as dynamic field using item name as key</span>
+        df::add(&<span class="keyword">mut</span> inventory.id, item_name, item);
+    }
+
+    <span class="comment">/// Remove an item from inventory</span>
+    <span class="keyword">public entry fun</span> <span class="function">remove_item</span>(
+        inventory: &<span class="keyword">mut</span> <span class="type">Inventory</span>,
+        item_name: <span class="type">String</span>,
+        ctx: &<span class="keyword">mut</span> <span class="type">TxContext</span>
+    ) {
+        <span class="keyword">let</span> item: <span class="type">GameItem</span> = df::remove(
+            &<span class="keyword">mut</span> inventory.id, 
+            item_name
+        );
+        
+        <span class="comment">// For this example, just drop the item</span>
+        <span class="keyword">let</span> <span class="type">GameItem</span> { name: _, power: _, rarity: _ } = item;
+    }
+
+    <span class="comment">/// Check if inventory has an item</span>
+    <span class="keyword">public fun</span> <span class="function">has_item</span>(
+        inventory: &<span class="type">Inventory</span>, 
+        item_name: <span class="type">String</span>
+    ): <span class="type">bool</span> {
+        df::exists_(&inventory.id, item_name)
+    }
+}`,
+                explanation: `
+                    <h4>What This Code Does</h4>
+                    <p>This implements a game inventory system using <strong>dynamic fields</strong> - a flexible way to add/remove data from objects at runtime.</p>
+
+                    <h4>Why Dynamic Fields?</h4>
+                    <p>Regular struct fields must be known at compile time. Dynamic fields let you:</p>
+                    <ul>
+                        <li>Add fields with names determined at runtime</li>
+                        <li>Store variable amounts of data</li>
+                        <li>Remove fields when no longer needed</li>
+                        <li>Only load the fields you need (gas efficient)</li>
+                    </ul>
+
+                    <div class="info-card">
+                        <strong>💡 Think of it like:</strong> A HashMap attached to your object. Keys and values can be added/removed dynamically.
+                    </div>
+
+                    <h4>Key Operations</h4>
+                    <ul>
+                        <li><strong>Add:</strong> <span class="code-highlight">df::add(&mut obj.id, key, value)</span></li>
+                        <li><strong>Remove:</strong> <span class="code-highlight">df::remove(&mut obj.id, key)</span></li>
+                        <li><strong>Borrow:</strong> <span class="code-highlight">df::borrow(&obj.id, key)</span></li>
+                        <li><strong>Check exists:</strong> <span class="code-highlight">df::exists_(&obj.id, key)</span></li>
+                    </ul>
+
+                    <h4>Use Cases</h4>
+                    <ul>
+                        <li><strong>Game inventories:</strong> Players can have any items</li>
+                        <li><strong>Registries:</strong> Domain name → owner mappings</li>
+                        <li><strong>Metadata:</strong> Attach extra info to objects</li>
+                        <li><strong>Collections:</strong> Variable-size collections of objects</li>
+                    </ul>
+
+                    <div class="success-card">
+                        <strong>✅ Gas Efficiency:</strong> When you access an inventory, you only pay gas for the specific items you touch, not the entire inventory.
+                    </div>
+
+                    <div class="warning-card">
+                        <strong>⚠️ Note:</strong> The value type must have the <span class="code-highlight">store</span> ability to be stored as a dynamic field.
+                    </div>
+                `

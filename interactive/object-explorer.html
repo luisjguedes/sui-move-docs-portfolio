@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sui Object Explorer - Interactive Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #495057;
+            transition: all 0.3s;
+            border: none;
+            background: none;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            background: white;
+        }
+
+        .tab-content {
+            padding: 40px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .object-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .object-card {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .object-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .object-card.selected {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .object-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .object-card p {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .badge-owned { background: #d1ecf1; color: #0c5460; }
+        .badge-shared { background: #fff3cd; color: #856404; }
+        .badge-immutable { background: #d4edda; color: #155724; }
+
+        .detail-view {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 20px;
+        }
+
+        .detail-view h4 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .keyword { color: #f56565; }
+        .type { color: #48bb78; }
+        .comment { color: #a0aec0; font-style: italic; }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .comparison-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8f9ff;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+        }
+
+        .interactive-demo {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+        }
+
+        .output-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 16px;
+            border-radius: 4px;
+            font-family: monospace;
+            min-height: 60px;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .info-box strong {
+            color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔷 Sui Object Explorer</h1>
+            <p>Interactive guide to understanding Sui's object model</p>
+        </div>
+
+        <div class="content">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('types')">Object Types</button>
+                <button class="tab" onclick="showTab('lifecycle')">Lifecycle</button>
+                <button class="tab" onclick="showTab('comparison')">Sui vs Ethereum</button>
+            </div>
+
+            <!-- Tab 1: Object Types -->
+            <div id="types" class="tab-content active">
+                <h2 style="margin-bottom: 20px;">Three Types of Sui Objects</h2>
+                
+                <div class="object-types">
+                    <div class="object-card" onclick="selectObject('owned')">
+                        <h3>
+                            <span class="icon">👤</span>
+                            Owned Objects
+                        </h3>
+                        <p>Belong to a specific address. Only the owner can modify or transfer. Enables parallel transaction processing.</p>
+                        <span class="badge badge-owned">Most Common</span>
+                    </div>
+
+                    <div class="object-card" onclick="selectObject('shared')">
+                        <h3>
+                            <span class="icon">🌐</span>
+                            Shared Objects
+                        </h3>
+                        <p>Accessible by anyone. Require consensus for modification. Used for DEXs, auctions, and multi-user applications.</p>
+                        <span class="badge badge-shared">Requires Consensus</span>
+                    </div>
+
+                    <div class="object-card" onclick="selectObject('immutable')">
+                        <h3>
+                            <span class="icon">🔒</span>
+                            Immutable Objects
+                        </h3>
+                        <p>Cannot be modified after creation. Anyone can read. Perfect for configuration data and historical records.</p>
+                        <span class="badge badge-immutable">Maximum Parallelism</span>
+                    </div>
+                </div>
+
+                <div id="owned-detail" class="detail-view" style="display: none;">
+                    <h4>Owned Object Example</h4>
+                    <div class="code-block">
+<span class="keyword">public struct</span> <span class="type">NFT</span> <span class="keyword">has key</span> {
+    id: <span class="type">UID</span>,
+    name: <span class="type">String</span>,
+    image_url: <span class="type">Url</span>,
+}
+
+<span class="keyword">public entry fun</span> create_nft(name: <span class="type">String</span>, ctx: &<span class="keyword">mut</span> <span class="type">TxContext</span>) {
+    <span class="keyword">let</span> nft = <span class="type">NFT</span> {
+        id: object::new(ctx),
+        name,
+        image_url: url::new_unsafe_from_bytes(b<span class="type">"https://example.com/nft.png"</span>),
+    };
+    <span class="comment">// Transfer to transaction sender</span>
+    transfer::transfer(nft, tx_context::sender(ctx));
+}
+                    </div>
+                    <div class="info-box">
+                        <strong>Use Case:</strong> Personal assets like NFTs, tokens, game items, or user-specific data.
+                    </div>
+                </div>
+
+                <div id="shared-detail" class="detail-view" style="display: none;">
+                    <h4>Shared Object Example</h4>
+                    <div class="code-block">
+<span class="keyword">public struct</span> <span class="type">Auction</span> <span class="keyword">has key</span> {
+    id: <span class="type">UID</span>,
+    highest_bid: <span class="type">u64</span>,
+    highest_bidder: <span class="type">Option</span>&lt;address&gt;,
+}
+
+<span class="keyword">public entry fun</span> create_auction(ctx: &<span class="keyword">mut</span> <span class="type">TxContext</span>) {
+    <span class="keyword">let</span> auction = <span class="type">Auction</span> {
+        id: object::new(ctx),
+        highest_bid: 0,
+        highest_bidder: option::none(),
+    };
+    <span class="comment">// Make accessible to everyone</span>
+    transfer::share_object(auction);
+}
+                    </div>
+                    <div class="info-box">
+                        <strong>Use Case:</strong> DEXs, auctions, DAOs, multiplayer games, or any multi-user state.
+                    </div>
+                </div>
+
+                <div id="immutable-detail" class="detail-view" style="display: none;">
+                    <h4>Immutable Object Example</h4>
+                    <div class="code-block">
+<span class="keyword">public struct</span> <span class="type">Config</span> <span class="keyword">has key</span> {
+    id: <span class="type">UID</span>,
+    protocol_fee: <span class="type">u64</span>,
+    admin: address,
+}
+
+<span class="keyword">public entry fun</span> publish_config(fee: <span class="type">u64</span>, ctx: &<span class="keyword">mut</span> <span class="type">TxContext</span>) {
+    <span class="keyword">let</span> config = <span class="type">Config</span> {
+        id: object::new(ctx),
+        protocol_fee: fee,
+        admin: tx_context::sender(ctx),
+    };
+    <span class="comment">// Make permanently immutable</span>
+    transfer::freeze_object(config);
+}
+                    </div>
+                    <div class="info-box">
+                        <strong>Use Case:</strong> Protocol configurations, reference data, constants, or historical records.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Lifecycle -->
+            <div id="lifecycle" class="tab-content">
+                <h2 style="margin-bottom: 20px;">Object Lifecycle Simulator</h2>
+                
+                <div class="interactive-demo">
+                    <h3 style="margin-bottom: 15px;">Create and Manage an Object</h3>
+                    <div class="demo-controls">
+                        <button class="btn btn-primary" onclick="createObject()">Create Object</button>
+                        <button class="btn btn-secondary" onclick="transferObject()">Transfer</button>
+                        <button class="btn btn-secondary" onclick="deleteObject()">Delete</button>
+                        <button class="btn btn-secondary" onclick="resetDemo()">Reset</button>
+                    </div>
+                    <div class="output-box" id="lifecycle-output">
+                        Click "Create Object" to begin...
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 30px; margin-bottom: 15px;">Lifecycle Stages</h3>
+                <div class="code-block">
+<span class="comment">// Stage 1: Creation</span>
+<span class="keyword">let</span> obj = <span class="type">MyObject</span> { id: object::new(ctx) };
+
+<span class="comment">// Stage 2: Ownership (choose one)</span>
+transfer::transfer(obj, recipient);        <span class="comment">// → Owned</span>
+transfer::share_object(obj);               <span class="comment">// → Shared</span>
+transfer::freeze_object(obj);              <span class="comment">// → Immutable</span>
+
+<span class="comment">// Stage 3: Modification (if mutable)</span>
+obj.value = 100;
+
+<span class="comment">// Stage 4: Deletion (if owned/shared)</span>
+<span class="keyword">let</span> <span class="type">MyObject</span> { id } = obj;
+object::delete(id);
+                </div>
+            </div>
+
+            <!-- Tab 3: Comparison -->
+            <div id="comparison" class="tab-content">
+                <h2 style="margin-bottom: 20px;">Sui vs Ethereum: Object Models</h2>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Sui Objects</th>
+                            <th>Ethereum Accounts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>State Model</strong></td>
+                            <td>Object-centric (each object independent)</td>
+                            <td>Account-centric (global state tree)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Parallelism</strong></td>
+                            <td>✅ High (owned objects don't conflict)</td>
+                            <td>❌ Low (shared global state)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ownership</strong></td>
+                            <td>Explicit (built into the model)</td>
+                            <td>Implicit (managed by contracts)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Transaction Conflicts</strong></td>
+                            <td>Rare (only with shared objects)</td>
+                            <td>Common (popular contracts bottleneck)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Gas Efficiency</strong></td>
+                            <td>Pay per object accessed</td>
+                            <td>Pay per computation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Composability</strong></td>
+                            <td>Object wrapping, dynamic fields</td>
+                            <td>Contract calls</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Best For</strong></td>
+                            <td>High-throughput, asset-focused dApps</td>
+                            <td>Complex smart contract interactions</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box" style="margin-top: 30px;">
+                    <strong>Key Insight:</strong> Sui's object model enables massive parallelization because transactions touching different objects can execute simultaneously. This is like having multiple cashiers in a store vs. one global queue in Ethereum.
+                </div>
+
+                <h3 style="margin-top: 30px; margin-bottom: 15px;">Performance Example</h3>
+                <div class="code-block">
+<span class="comment">// Sui: These can run in parallel</span>
+Transaction 1: Alice transfers her NFT → <span class="type">Executes immediately</span>
+Transaction 2: Bob transfers his NFT  → <span class="type">Executes immediately</span>
+Result: <span class="type">2 transactions / second</span>
+
+<span class="comment">// Ethereum: Must execute sequentially</span>
+Transaction 1: Alice transfers NFT → <span class="type">Block 1</span>
+Transaction 2: Bob transfers NFT  → <span class="type">Block 2</span>
+Result: <span class="type">1 transaction / block</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentObject = null;
+        let objectState = 'none';
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function selectObject(type) {
+            // Hide all details
+            document.querySelectorAll('[id$="-detail"]').forEach(detail => {
+                detail.style.display = 'none';
+            });
+
+            // Remove selected class from all cards
+            document.querySelectorAll('.object-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Show selected detail
+            document.getElementById(type + '-detail').style.display = 'block';
+            
+            // Add selected class to clicked card
+            event.currentTarget.classList.add('selected');
+        }
+
+        function createObject() {
+            if (objectState === 'none') {
+                objectState = 'created';
+                currentObject = {
+                    id: '0x' + Math.random().toString(16).substr(2, 8),
+                    owner: '0xABCD...1234',
+                    version: 1
+                };
+                updateOutput(`✅ Object created!
+ID: ${currentObject.id}
+Owner: ${currentObject.owner}
+Version: ${currentObject.version}
+Status: Owned`);
+            } else {
+                updateOutput('⚠️ Object already exists. Reset to create a new one.');
+            }
+        }
+
+        function transferObject() {
+            if (objectState === 'created') {
+                currentObject.owner = '0xEF56...7890';
+                currentObject.version++;
+                updateOutput(`✅ Object transferred!
+ID: ${currentObject.id}
+New Owner: ${currentObject.owner}
+Version: ${currentObject.version}
+Status: Owned (by different address)`);
+            } else if (objectState === 'none') {
+                updateOutput('⚠️ No object to transfer. Create one first.');
+            } else {
+                updateOutput('⚠️ Object has been deleted.');
+            }
+        }
+
+        function deleteObject() {
+            if (objectState === 'created') {
+                objectState = 'deleted';
+                updateOutput(`✅ Object deleted!
+ID: ${currentObject.id} (no longer exists)
+Final Version: ${currentObject.version}
+Status: Deleted`);
+                currentObject = null;
+            } else if (objectState === 'none') {
+                updateOutput('⚠️ No object to delete. Create one first.');
+            } else {
+                updateOutput('⚠️ Object already deleted.');
+            }
+        }
+
+        function resetDemo() {
+            objectState = 'none';
+            currentObject = null;
+            updateOutput('🔄 Demo reset. Click "Create Object" to begin...');
+        }
+
+        function updateOutput(text) {
+            document.getElementById('lifecycle-output').textContent = text;
+        }
+    </script>
+</body>
+</html>

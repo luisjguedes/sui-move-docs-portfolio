@@ -7,7 +7,8 @@
 
 ## About This Portfolio
 
-This repository showcases my ability to create clear, comprehensive technical documentation for blockchain technology, specifically the Sui blockchain and Move programming language. As a Staff Technical Writer with 20+ years of experience, I've created this portfolio to demonstrate:
+This repository showcases the creation of clear, comprehensive technical documentation for blockchain technology, specifically the Sui blockchain and Move programming language. 
+This portfolio demonstrates:
 
 - **Quick learning** of complex technical domains
 - **Developer-focused** documentation that enables action

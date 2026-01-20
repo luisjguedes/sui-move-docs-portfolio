@@ -130,16 +130,14 @@ sui-move-docs-portfolio/
 └── CONTRIBUTING.md
 ```
 
-## How This Demonstrates Mysten Labs Fit
+## Documentation Features
 
-This portfolio directly aligns with Mysten Labs' technical writing needs:
-
-✅ **Blockchain expertise** - Rapid learning of Sui/Move domain  
-✅ **Developer focus** - API docs, CLI reference, code examples  
-✅ **System complexity** - Explaining distributed systems clearly  
-✅ **Modern practices** - Git workflows, docs-as-code  
-✅ **Innovation mindset** - AI-enhanced documentation processes  
-✅ **Quality standards** - Consistent structure, accuracy, usability
+- Comprehensive Sui and Move language coverage
+- Developer-focused content: quickstarts, tutorials, and API references
+- Interactive HTML examples for visual learning
+- AI-enhanced documentation workflows
+- Structured authoring with consistent style guidelines
+- Git-based version control and collaborative editing
 
 ## Usage
 

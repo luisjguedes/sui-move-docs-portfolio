@@ -4,6 +4,13 @@ This directory contains interactive HTML documentation that demonstrates modern,
 
 ## Pages
 
+### 🎮 Interactive Documentation
+
+| Page | Description | Live Demo |
+|------|-------------|-----------|
+| Object Explorer | Interactive Sui object model guide | [View Live](https://luisjguedes.github.io/sui-move-docs-portfolio/interactive/object-explorer.html) |
+| Code Playground | Move code examples with explanations | [View Live](https://luisjguedes.github.io/sui-move-docs-portfolio/interactive/code-playground.html) |
+
 ### 🔷 Sui Object Explorer
 **File:** `object-explorer.html`
 
